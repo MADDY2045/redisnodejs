@@ -9,6 +9,24 @@ const client = redis.createClient(redis_port);
 
 const app = express();
 
+var exec = require('child_process').execFile;
+
+var redisstart =function(){
+  exec('D:\\redis\\redis\\redis-server.exe', function(err, data) {
+        console.log(err)
+        console.log('data',data.toString());
+    });
+}
+redisstart();
+
+client.on('ready',function() {
+    console.log(`Redis is ready`);
+   });
+
+client.on('error',function(err) {
+    console.log(`Error in Redis ${err}`);
+   });
+
 function setResponse(username,repos){
     return `<h3>${username} has ${repos} repositories in git hub</h3>`
 }
@@ -42,6 +60,7 @@ function cache(req,res,next){
         }
     })
 }
+
 app.get('/repos/:username',cache,getRepos);
 
 app.get('/redis/flushall',(req,res)=>{
