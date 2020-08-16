@@ -180,13 +180,27 @@ app.post("/createevent",async(req,res)=>{
                 await pool.query(`SELECT * from events`,(err,output)=>{
                     if(err){
                         console.log(`error in fetching events data from query :${err}`)
-                    }else{
+                    }
+                    else{
                         console.log(output.rows.length);
+                        client.hmset('test',
+                                {'demo2': 'example3',
+                                'demo3': 'example4',
+                                'demo4': 'example5'
+                            });
+                            getAllRedisCacheData();
                     }
                 })
             }
         })
 
+    }
+
+    function getAllRedisCacheData(req,res,next){
+        console.log(`reached here`);
+        client.hgetall('test', function(err, object) {
+            console.log(object);
+        });
     }
 
 app.listen(port, ()=>console.log(`app is listening on ${port}`));
