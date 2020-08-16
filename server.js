@@ -172,20 +172,21 @@ app.post("/createevent",async(req,res)=>{
             })
 
     async function invokeredisevent(req,res,next){
-        await client.flushall((err,reply)=>{
+        await client.flushall(async(err,reply)=>{
             if(err){
                 console.log(`error in flushing ${err}`)
             }else{
                 console.log(`Is Flushed ? :${reply}`);
+                await pool.query(`SELECT * from events`,(err,output)=>{
+                    if(err){
+                        console.log(`error in fetching events data from query :${err}`)
+                    }else{
+                        console.log(output.rows.length);
+                    }
+                })
             }
         })
-        await pool.query(`SELECT * from events`,(err,output)=>{
-            if(err){
-                console.log(`error in fetching events data from query :${err}`)
-            }else{
-                console.log(output.rows.length);
-            }
-        })
+
     }
 
 app.listen(port, ()=>console.log(`app is listening on ${port}`));
