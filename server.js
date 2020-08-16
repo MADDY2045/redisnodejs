@@ -182,13 +182,49 @@ app.post("/createevent",async(req,res)=>{
                         console.log(`error in fetching events data from query :${err}`)
                     }
                     else{
-                        console.log(output.rows.length);
-                        client.hmset('test',
-                                {'demo2': 'example3',
-                                'demo3': 'example4',
-                                'demo4': 'example5'
-                            });
-                            getAllRedisCacheData();
+                        console.log(output.rows[0]);
+                        output.rows.map(row=>{
+                            client.hmset(row.eventid,
+                            {'enablepush': row.enablepush ? row.enablepush :false,
+                            'enablesms': row.enablesms ? row.enablesms:false,
+                            'enabledesktop': row.enabledesktop ? row.enabledesktop:false,
+                            'enablewhatsapp': row.enablewhatsapp ? row.enablewhatsapp:false,
+                            'enableemail': row.enableemail ? row.enableemail:false,
+                            'pushtitle': row.pushtitle ? row.pushtitle:'null',
+                            'pushtemplate': row.pushtemplate ? row.pushtemplate:'null',
+                            'condition': row.condition ? row.condition:'null',
+                            'created': row.created ? row.created:'null',
+                            'modified': row.modified ? row.modified:'null',
+                            'createdby': row.createdby ? row.createdby:'null',
+                            'modifiedby': row.modifiedby ? row.modifiedby:'null',
+                            'isactive': row.isactive ? row.isactive:false,
+                            'isdeleted': row.isdeleted ? row.isdeleted:'null',
+                            'resourcename': row.resourcename ? row.resourcename:'null',
+                            'pagename': row.pagename ? row.pagename : 'null',
+                            'actionverb': row.actionverb ? row.actionverb:'null',
+                            'roleid': row.roleid ? row.roleid : 'null',
+                            'userid': row.userid ? row.userid:'null',
+                            'smstemplate': row.smstemplate ? row.smstemplate:'null',
+                            'emailsubjecttemplate': row.emailsubjecttemplate ? row.emailsubjecttemplate:'null',
+                            'emailbodytemplate': row.emailbodytemplate ? row.emailbodytemplate:'null',
+                            'recipientmobile': row.recipientmobile ? row.recipientmobile:'null',
+                            'recipientemail': row.recipientemail ? row.recipientemail:'null',
+                            'cc': row.cc ? row.cc:'null',
+                            'bcc': row.bcc ? row.bcc:'null',
+                            'fromaddress': row.fromaddress ? row.fromaddress:'null',
+                            'transactionurl': row.transactionurl ? row.transactionurl:'null',
+                            'gatewaytemplate': row.gatewaytemplate ? row.gatewaytemplate:'null',
+                            'isschedulerevent': row.isschedulerevent ? row.isschedulerevent:'null',
+                            'notificationtime': row.notificationtime ? row.notificationtime:'null',
+                            'eventname': row.eventname ? row.eventname:'null',
+                            'issystemevent': row.issystemevent ? row.issystemevent:'null',
+                            'istrackerevent': row.istrackerevent ? row.istrackerevent:'null',
+                            'isservesmartevent': row.isservesmartevent ? row.isservesmartevent:'null',
+                            'customerid': row.customerid ? row.customerid:'null'
+
+                           });
+                        getAllRedisCacheData();
+                        })
                     }
                 })
             }
@@ -198,7 +234,7 @@ app.post("/createevent",async(req,res)=>{
 
     function getAllRedisCacheData(req,res,next){
         console.log(`reached here`);
-        client.hgetall('test', function(err, object) {
+        client.hgetall('644f6', function(err, object) {
             console.log(object);
         });
     }
