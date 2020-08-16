@@ -1,11 +1,15 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
-
-function App() {
+import EventCreation from './components/NotificationPage';
+import { Route,Switch } from 'react-router-dom';
+const App=()=>{
   return (
     <div className="App">
-     <h1>Create Notification Page</h1>
+      <Switch>
+        <Route exact path ='/' component={EventCreation}/>
+        <Route exact path ='*' component={()=><h1>404 NOT FOUND</h1>}/>
+      </Switch>
+
     </div>
   );
 }

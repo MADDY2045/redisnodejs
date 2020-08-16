@@ -1,38 +1,233 @@
-.App {
-  text-align: center;
+body{
+  background: #ada397;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.main-container{
+  min-height: 800px;
+  max-width: 1200px;
+  margin:auto;
+  margin-top: 20px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+#name-description{
+  min-height: 130px;
+  width: 1200px;
+  border:1px solid grey;
+  position: relative;
+  left:14px;
+  border-bottom-style: hidden;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+#notification-details{
+  min-height: 200px;
+  width: 1200px;
+  border:1px solid grey;
+  position: relative;
+  left:14px;
+  border-bottom-style: hidden;
 }
 
-.App-link {
-  color: #61dafb;
+#recipients-content{
+  min-height: 280px;
+  width: 1200px;
+  border:1px solid grey;
+  position: relative;
+  left:14px;
+  border-bottom-style: hidden;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+#conditions-delivery{
+  min-height: 150px;
+  width: 1200px;
+  border:1px solid grey;
+  position: relative;
+  left:14px;
+}
+
+#footer button{
+  margin: 10px 15px 5px 255px;
+}
+
+#name-description-form{
+  position: relative;
+  top:12px;
+ }
+
+ #name{
+   position: relative;
+   left:60px;
+ }
+
+ #description{
+  position: relative;
+  left:420px;
+  width: 500px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  top:45px;
+  left:-612px;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color:  #10ce09;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #10ce09;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+#resource{
+  position: relative;
+  left:60px;
+  top:-30px;
+}
+
+#action{
+  position: relative;
+  left:170px;
+  top:-30px;
+  width: 200px;
+}
+
+#recipient-type{
+  position: relative;
+  left:-345px;
+  top:60px;
+}
+
+.channel{
+  position: relative;
+  top:0px;
+}
+
+.category{
+  position: relative;
+  top:0px;
+  left:50px;
+}
+
+#recipients-label{
+  position: relative;
+  left:70px;
+  font-size: large;
+}
+
+#recipients{
+  width:500px;
+  position: relative;
+  left:100px;
+}
+
+#notification-title-label{
+  position: relative;
+  left:70px;
+  font-size: large;
+}
+
+#notification-title-input{
+  width:450px;
+  position: relative;
+  left:100px;
+}
+
+#notification-body-div{
+  position: relative;
+  top:20px;
+}
+
+#notification-body-label{
+  position: relative;
+  left:70px;
+  font-size: large;
+}
+
+#notification-body{
+  width:462px;
+  position: relative;
+  left:100px;
+}
+
+#previewbtn{
+  position: relative;
+  left:870px;
+  top:-70px;
+}
+
+#condition-div{
+  margin:30px;
+}
+
+#condition-key{
+  position: relative;
+  left:50px;
+}
+#condition-value{
+  position: relative;
+  left:150px;
+}
+
+#conditionbtn{
+  position: relative;
+  left:200px;
+}
+
+#list-condition-div{
+  position: relative;
+  left:800px;
+  top:-50px;
+  overflow-y:auto;
+}
+
+li{
+  list-style: none;
 }
