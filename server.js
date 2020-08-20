@@ -6,32 +6,31 @@ const cors = require('cors');
 const port = 6070;
 const redis_port = 6379;
 const { v4: uuidv4 } = require('uuid');
-
+const client = redis.createClient(redis_port);
 const app = express();
 
 app.use(express.json());
 app.use(cors());
 
-var exec = require('child_process').execFile;
-const client = redis.createClient(redis_port);
 
-        exec('D:\\redis\\redis\\redis-server.exe',(err,output)=>{
-            if(err){
-                console.log(`error in starting redis : ${err}`)
-            }else{
-                console.log('output',output);
-            }
-        })
 
         client.on('ready',function() {
             console.log(`Redis is ready`);
            });
 
-        client.on('error',function(err) {
-            console.log(`Error in Redis ${err}`);
+        client.on('error',(bug,output)=>{
+        //    var exec = require('child_process').execFile;
+        //     exec('D:\\redis\\redis\\redis-server.exe',(err,output)=>{
+        //     if(bug){
+        //         console.log(`error in starting redis : ${bug}`)
+        //     }else{
+        //         console.log('Restarting Redis:::',output);
+        //     }
+        // })
            });
 
-app.post("/createevent",async(req,res)=>{
+app.post("/createevent",getAllRedisCacheData,async(req,res)=>{
+
     //console.log(req.body);
     let recipientemail=null;
     let bcc=null;
@@ -131,7 +130,7 @@ app.post("/createevent",async(req,res)=>{
                         console.log(`error in fetching events data from query :${err}`)
                     }
                     else{
-                        console.log(output.rows[0]);
+                        //console.log(output.rows[0]);
                         output.rows.map(row=>{
                             client.hmset(row.eventid,
                             {'enablepush': row.enablepush ? row.enablepush :false,
@@ -172,7 +171,6 @@ app.post("/createevent",async(req,res)=>{
                             'customerid': row.customerid ? row.customerid:'null'
 
                            });
-                        getAllRedisCacheData();
                         })
                     }
                 })
@@ -181,11 +179,25 @@ app.post("/createevent",async(req,res)=>{
 
     }
 
-    function getAllRedisCacheData(req,res,next){
-        console.log(`reached here`);
-        client.hgetall('644f6', function(err, object) {
-            console.log(object);
+    async function getAllRedisCacheData(req,res,next){
+        // client.shutdown((err,result)=>{
+        //         console.log('shut down completely');
+        // })
+
+       await client.hgetall('ec713', function(err, object) {
+            if(err){
+                console.log(`error in getting all objects: ${err}`)
+            }else{
+               if(object !== undefined && object !== null ){
+                    console.log(`reached here`);
+                    console.log('hget object is::',object);
+                }else{
+                    console.log(`requested event id not found`);
+                }
+            }
         });
+        next();
     }
+
 
 app.listen(port, ()=>console.log(`app is listening on ${port}`));
