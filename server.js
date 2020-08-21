@@ -18,3 +18,5 @@ if(cluster.isMaster){
     })
     app.listen(port,()=>console.log(`app is listening on port ${port}`));
 }
+
+//note : we can check the traffic based on loadtest npm by simulating an injection of multiple rquests using loadtest -n 500 http://localhost:6070
