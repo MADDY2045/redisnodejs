@@ -1,18 +1,41 @@
 var cluster    = require('cluster');
 var http       = require('http');
 var nodemailer = require('nodemailer');
+const { google } = require("googleapis");
+const OAuth2 = google.auth.OAuth2;
+const cors = require('cors');
+
 var httpPort   = process.env.PORT || 6070;
 var httpHost   = process.env.HOST || '127.0.0.1';
 var children   = {};
 var emails     = [];
 
-var transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: require('./.emailUsername'),
-    pass: require('./.emailPassword')
-  }
+const oauth2Client = new OAuth2(
+    "485008776010-gqcbhhonfdefituo7pr206sqpmdl4ql6.apps.googleusercontent.com",
+    "tLyJNAGybUV33JZvlpaLMSU2",
+    "https://developers.google.com/oauthplayground"
+);
+
+oauth2Client.setCredentials({
+    refresh_token: "1//04v_p73yVXSMZCgYIARAAGAQSNwF-L9Ir0KBmspuZRcxLIDHTrnqKTbK8o6HC1oo-rrSLlhjDtOnnK5Ys_PoqhnCx2doCRcITzsY"
 });
+const accessToken = oauth2Client.getAccessToken()
+
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+         type: "OAuth2",
+         user: "madhavaneee08@gmail.com",
+         clientId: "485008776010-gqcbhhonfdefituo7pr206sqpmdl4ql6.apps.googleusercontent.com",
+         clientSecret: "tLyJNAGybUV33JZvlpaLMSU2",
+         refreshToken: "1//04v_p73yVXSMZCgYIARAAGAQSNwF-L9Ir0KBmspuZRcxLIDHTrnqKTbK8o6HC1oo-rrSLlhjDtOnnK5Ys_PoqhnCx2doCRcITzsY",
+         accessToken: accessToken
+    },
+    tls: {
+        rejectUnauthorized: false
+      }
+});
+
 
 var log = function(p, msg){
   var name, pid;
@@ -96,10 +119,10 @@ var doWorkerStuff = function(){
 
   var sendEmail = function(to, subject, text, callback){
     var email = {
-      from:    require('./.emailUsername'),
-      to:      to,
-      subject: subject,
-      text:    text,
+      from:  "madhavaneee08@gmail.com",
+      to:to,
+      subject:subject,
+      text:text,
     };
 
     transporter.sendMail(email, function(error, info){
