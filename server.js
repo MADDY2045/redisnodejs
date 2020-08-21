@@ -40,53 +40,38 @@ const transporter = nodemailer.createTransport({
 
 
 if(cluster.isMaster){
-    // log('master', 'started master');
 
-    var masterLoop = function(){
+    function masterLoop(){
       checkOnWebServer();
       checkOnEmailWorker();
     };
 
     function checkOnWebServer(){
       if(children.server === undefined){
-        // log('master', 'starting web server');
         children.server = cluster.fork({ROLE: 'server'});
         children.server.name = 'web server';
-        //children.server.on('online',()=>log(children.server, `ready on port ${httpPort}`));
         children.server.on('exit',()=>{
-        //   log(children.server, 'died :(');
-          return delete children.server;
+            return delete children.server;
         });
-
-        children.server.on('message',(response)=>{
-           console.log(`entered checkOnWebServer ${JSON.stringify(response)}`)
-        //   log(children.server, `got an email to send from the webserver: ${JSON.stringify(response,null,2)}`);
-          children.worker.send(response);
-        });
+        children.server.on('message',(response)=>children.worker.send(response));
       }
     };
 
     function checkOnEmailWorker(){
       if(children.worker === undefined){
-        // log('master', 'starting email worker');
         children.worker = cluster.fork({ROLE: 'worker'});
         children.worker.name = 'email worker';
-       // children.worker.on('online',    function(){ log(children.worker, 'ready!'); });
-        children.worker.on('exit',      function(){
-        //   log(children.worker, 'died :(');
-          delete children.worker;
+        children.worker.on('exit',()=>{
+                delete children.worker;
         });
-        children.worker.on('message',  (message)=>{
-            console.log(`entered on message function checkOnEmailWorker ${JSON.stringify(message,null,2)}`)
-        //   log(children.worker, JSON.stringify(message));
-        });
-      }
+        children.worker.on('message',(message)=>console.log(message.msg));
+        }
     };
     setInterval(masterLoop, 1000);
 }else{
   if(process.env.ROLE === 'server'){
       app.listen(httpPort,()=>console.log(`app is listening on ${httpPort}`))
-      app.get("/:to/:subject/:message",(req,res)=>{
+      app.post("/:to/:subject/:message",(req,res)=>{
           const { to,subject,message } = req.params;
           var email    = {
             to: decodeURI(to),
@@ -99,31 +84,16 @@ if(cluster.isMaster){
         })
    }
   if(process.env.ROLE === 'worker'){
-    process.on('message', function(message){
+    process.on('message',(message)=>{
         emails.push(message);
       });
 
-      var sendEmail = async function(to, subject, text, callback){
-        var email = {
-          from:  "madhavaneee08@gmail.com",
-          to:to,
-          subject:subject,
-          text:text,
-        };
-
-        await transporter.sendMail(email, function(error, info){
-          callback(error, email);
-        });
-      };
-
-      function workerLoop(){
+     function workerLoop(){
         if(emails.length === 0){
           setTimeout(workerLoop, 1000);
         }else{
-            console.log(`emails are ${JSON.stringify(emails,null,2)}`);
-          var e = emails.shift();
-          console.log(`e is ${JSON.stringify(e,null,2)}`);
-          process.send({msg: 'trying to send an email...'});
+        var e = emails.shift();
+         process.send({msg:`trying to send an email to ${e.to}`});
           sendEmail(e.to, e.subject, e.text, function(error){
             if(error){
               emails.push(e); // try again
@@ -140,14 +110,15 @@ if(cluster.isMaster){
    }
 }
 
-// function log(p, msg){
-//     var name, pid;
-//    if(p.name !== undefined){
-//      name = p.name;
-//      pid  = p.process.pid;
-//    }else{
-//      name = 'master';
-//      pid = process.pid;
-//    }
-//    console.log('[' + name + ' @ ' + pid + '] ' + msg);
-//  };
+async function sendEmail(to, subject, text, callback){
+    var email = {
+      from:  "madhavaneee08@gmail.com",
+      to:to,
+      subject:subject,
+      text:text,
+    };
+
+    await transporter.sendMail(email,(error, info)=>{
+      callback(error, email);
+    });
+  };

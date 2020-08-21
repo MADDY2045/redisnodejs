@@ -231,3 +231,33 @@ input:checked + .slider:before {
 li{
   list-style: none;
 }
+
+#cluster-email{
+  min-height: 500px;
+  margin:100px auto;
+}
+
+#email-select-div{
+  position: relative;
+  top:90px;
+  left:400px;
+}
+
+#subject-select-div{
+  position: relative;
+  top:130px;
+  left:400px;
+}
+
+#message-select-div{
+  position: relative;
+  top:180px;
+  left:400px;
+}
+
+#btn-email{
+  position: relative;
+  height:50px;
+  top:380px;
+  left:230px;
+}
