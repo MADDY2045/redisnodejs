@@ -38,9 +38,9 @@ const smtpTransport = nodemailer.createTransport({
 const mailOptions = {
     from: "madhavaneee08@gmail.com",
     to: "madhavan@growsmartsmb.com",
-    subject: "Node.js Email with Secure OAuth",
+    subject: "Another Test for oAuth",
     generateTextFromHTML: true,
-    html: "<b>test</b>"
+    html: `<b>test</b><br><h3>Hello , good to here from you</h3>`
 };
 
 
