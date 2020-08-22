@@ -261,3 +261,11 @@ li{
   top:380px;
   left:230px;
 }
+
+#btn-stop-service{
+  position: relative;
+  height:50px;
+  top:380px;
+  left:230px;
+
+}

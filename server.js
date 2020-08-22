@@ -5,12 +5,21 @@ var nodemailer = require('nodemailer');
 const { google } = require("googleapis");
 const OAuth2 = google.auth.OAuth2;
 const cors = require('cors');
+const { Worker, Scheduler, Queue } = require("node-resque");
 
-var httpPort   = process.env.PORT || 6070;
 app.use(cors());
+const port = 6070;
 
-var children   = {};
-var emails     = [];
+const connectionDetails = {
+    pkg: "ioredis",
+    host: "127.0.0.1",
+    password: null,
+    port: 6379,
+    database: 0,
+    // namespace: 'resque',
+    // looping: true,
+    // options: {password: 'abc'},
+  };
 
 const oauth2Client = new OAuth2(
     "485008776010-gqcbhhonfdefituo7pr206sqpmdl4ql6.apps.googleusercontent.com",
@@ -38,87 +47,98 @@ const transporter = nodemailer.createTransport({
       }
 });
 
+let jobstocomplete;
+var jobs = {
+    sendemail:async (to,subject,message)=>{
+        jobstocomplete--
+        boot()
+        to}
+    }
 
-if(cluster.isMaster){
+    async function tryShutdown(){
+        if(jobstocomplete===0){
 
-    function masterLoop(){
-      checkOnWebServer();
-      checkOnEmailWorker();
-    };
-
-    function checkOnWebServer(){
-      if(children.server === undefined){
-        children.server = cluster.fork({ROLE: 'server'});
-        children.server.name = 'web server';
-        children.server.on('exit',()=>{
-            return delete children.server;
-        });
-        children.server.on('message',(response)=>children.worker.send(response));
-      }
-    };
-
-    function checkOnEmailWorker(){
-      if(children.worker === undefined){
-        children.worker = cluster.fork({ROLE: 'worker'});
-        children.worker.name = 'email worker';
-        children.worker.on('exit',()=>{
-                delete children.worker;
-        });
-        children.worker.on('message',(message)=>console.log(message.msg));
         }
-    };
-    setInterval(masterLoop, 1000);
-}else{
-  if(process.env.ROLE === 'server'){
-      app.listen(httpPort,()=>console.log(`app is listening on ${httpPort}`))
-      app.post("/:to/:subject/:message",(req,res)=>{
-          const { to,subject,message } = req.params;
-          var email    = {
-            to: decodeURI(to),
-            subject: decodeURI(subject),
-            text: decodeURI(message),
-          };
-          var response = {email: email};
-          res.send(response)
-          process.send(email);
-        })
-   }
-  if(process.env.ROLE === 'worker'){
-    process.on('message',(message)=>{
-        emails.push(message);
-      });
+    }
 
-     function workerLoop(){
-        if(emails.length === 0){
-          setTimeout(workerLoop, 1000);
-        }else{
-        var e = emails.shift();
-         process.send({msg:`trying to send an email to ${e.to}`});
-          sendEmail(e.to, e.subject, e.text, function(error){
-            if(error){
-              emails.push(e); // try again
-              process.send({msg: 'failed sending email, trying again :('});
-            }else{
-              process.send({msg: 'email sent!'});
-            }
-            setTimeout(workerLoop, 1000);
+async function boot(){
+    if(jobstocomplete === 0){
+            console.log('entered if part ::::');
+    }else{
+        console.log(`entered boot`);
+        const worker = new Worker(
+            { connection: connectionDetails, queues: ["math"] },
+            jobs
+          );
+          await worker.connect();
+          worker.start();
+
+          worker.on("start", () => {
+            console.log("worker started");
           });
-        }
-      };
+          worker.on("end", () => {
+            console.log("worker ended");
+          });
+          worker.on("cleaning_worker", (worker, pid) => {
+            console.log(`cleaning old worker ${worker}`);
+          });
+          worker.on("poll", (queue) => {
+            console.log(`worker polling ${queue}`);
+          });
+          worker.on("ping", (time) => {
+            console.log(`worker check in @ ${time}`);
+          });
+          worker.on("job", (queue, job) => {
+            console.log(`working job ${queue} ${JSON.stringify(job)}`);
+          });
+          worker.on("reEnqueue", (queue, job, plugin) => {
+            console.log(`reEnqueue job (${plugin}) ${queue} ${JSON.stringify(job)}`);
+          });
+          worker.on("success", (queue, job, result, duration) => {
+            console.log(
+              `job success ${queue} ${JSON.stringify(job)} >> ${result} (${duration}ms)`
+            );
+          });
+          worker.on("failure", (queue, job, failure, duration) => {
+            console.log(
+              `job failure ${queue} ${JSON.stringify(
+                job
+              )} >> ${failure} (${duration}ms)`
+            );
+          });
+          worker.on("error", (error, queue, job) => {
+            console.log(`error ${queue} ${JSON.stringify(job)}  >> ${error}`);
+          });
+          worker.on("pause", () => {
+            console.log("worker paused");
+          });
+    }
 
-      workerLoop();
-   }
 }
 
-async function sendEmail(to, subject, text, callback){
-    var email = {
-      from:  "madhavaneee08@gmail.com",
-      to:to,
-      subject:subject,
-      text:text,
-    };
 
-    await transporter.sendMail(email,(error, info)=>{
-      callback(error, email);
+
+app.post('/:to/:subject/:text',async(req,res)=>{
+    const { to,subject,text }= req.params;
+    console.log(`to:${to},subject:${subject},text:${text}`);
+    const queue = new Queue({ connection: connectionDetails }, jobs);
+    queue.on("error", function (error) {
+        console.log(error);
     });
-  };
+  await queue.connect();
+  await queue.enqueue("math", "sendemail", [to,subject,text]);
+  jobstocomplete=1;
+    res.send("reached safely");
+})
+
+app.listen(port,()=>console.log(`app is listening on port ${port}`));
+
+boot();
+
+app.get('/stopworkerservice',async(req,res)=>{
+    console.log('entered get stop');
+    await queue.end()
+    await worker.end()
+    res.send("service stopped");
+
+})

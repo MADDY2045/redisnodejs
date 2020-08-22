@@ -27,6 +27,14 @@ class EmailCluster extends Component {
         })
         .catch(err=>console.log(`error in axios post of email`))
     }
+
+    handleStopservice=()=>{
+        console.clear();
+        axios.get(`http://localhost:6070/stopworkerservice`).then(response=>{
+            console.log(response.data);
+        })
+        .catch(err=>console.log(`error in axios post of email`))
+    }
     render() {
         return (
             <div className="container card" id="cluster-email">
@@ -76,6 +84,10 @@ class EmailCluster extends Component {
                     id="btn-email"
                     onClick={this.handleSubmit}
                     className="btn btn-outline-dark">Send Email</button>
+                     <button
+                    id="btn-stop-service"
+                    onClick={this.handleStopservice}
+                    className="btn btn-info">Stop Service</button>
                 </div>
             </div>
         );
