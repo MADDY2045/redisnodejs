@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "async": "^3.2.0",
     "axios": "^0.19.2",
     "child_process": "^1.0.2",
     "cluster": "^0.7.7",
